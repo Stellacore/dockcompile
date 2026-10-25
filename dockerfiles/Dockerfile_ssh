@@ -1,0 +1,171 @@
+
+ARG COMPILER_VERSION=gcc
+FROM ${COMPILER_VERSION}
+
+# ---
+# --- Prep for package installations (default to latest available)
+# ---
+
+# install development packages
+RUN apt-get -qq update
+
+
+# ---
+# --- Setup user/group name/id for easy file permission/access
+# ---
+
+# Container system will have this user setup
+ARG USER_NAME=build
+ARG GROUP_NAME=build
+ARG USER_ID=1000
+ARG GROUP_ID=${USER_ID}
+ARG USER_ROOT_PWD=${GROUP_NAME}
+
+# Configure development user(s)
+RUN \
+	groupadd --gid ${GROUP_ID} ${GROUP_NAME} \
+	&& \
+	useradd \
+		--uid ${USER_ID} \
+		--gid ${GROUP_ID} \
+		-G sudo \
+		--create-home \
+		-s /bin/bash \
+		${USER_NAME} \
+	&& \
+	echo ${USER_NAME}:${USER_ROOT_PWD} | chpasswd \
+	&& \
+	echo root:${USER_ROOT_PWD} | chpasswd \
+	;
+
+# ---
+# --- SSH access
+# ---
+
+# Configure for remote ssh access
+RUN apt-get install -y \
+	openssh-server \
+	sudo \
+	;
+RUN \
+    mkdir -p /var/run/sshd /home/${USER_NAME}/.ssh \
+    && \
+    chmod 700 /home/${USER_NAME}/.ssh \
+    && \
+    chown -R ${USER_NAME}:${USER_NAME} /home/${USER_NAME}/.ssh \
+    ;
+RUN printf \
+    "PasswordAuthentication yes\nPermitRootLogin no\n"\
+    >> /etc/ssh/sshd_config \
+    ;
+EXPOSE 22
+
+
+# ---
+# --- Configure the docker (image) system as needed
+# ---
+
+# e.g. provide xeyes, xclock, etc to test graphics forwarding
+RUN apt-get install -y \
+	x11-apps \
+	xauth \
+	;
+
+# Personal tools
+RUN apt-get install -y \
+	vim \
+	tree \
+	;
+
+# General -development
+RUN apt-get install -y \
+	wget \
+	curl \
+	build-essential \
+	cmake \
+	cmake-curses-gui \
+	ccache \
+	clang \
+	doxygen \
+	graphviz \
+	valgrind \
+	;
+
+# ceres-solver - development
+RUN apt-get install -y \
+	libgoogle-glog-dev \
+	libgflags-dev \
+	libboost-graph-dev \
+	libeigen3-dev \
+	libsuitesparse-dev \
+	libopenblas-serial-dev \
+	libabsl-dev \
+	;
+
+# Realsense - setup
+RUN apt-get install -y \
+	libusb-1.0-0-dev \
+	libudev-dev \
+	;
+
+# X11 - development
+RUN apt-get install -y \
+	libx11-dev \
+	libxi-dev \
+	libxft-dev \
+	libxinerama-dev \
+	libglu1-mesa-dev \
+	\
+	libxcursor-dev \
+	libasound2-dev \
+	;
+
+# FLTK - development
+RUN apt-get install -y \
+	freeglut3-dev \
+	libcairo2-dev \
+	libfontconfig1-dev \
+	libglew-dev \
+	libjpeg-dev \
+	libpng-dev \
+	libpango1.0-dev \
+	libxcb-cursor-dev \
+	libxcb-cursor0 \
+	;
+
+# Qt6 - development
+RUN apt-get install -y \
+	qt6-3d-dev \
+	qt6-base-dev \
+	qt6-base-dev-tools \
+	;
+
+# CFCapture
+RUN apt-get install -y \
+	libopencv-dev \
+	libxkbcommon-dev \
+	qt6-multimedia-dev \
+	libqt6multimedia6 \
+	libqt6multimediawidgets6 \
+	;
+# Additional CFCapgture
+RUN apt-get install -y \
+	libxcb-cursor-dev \
+	libxcb-cursor0 \
+	;
+
+# Network packages
+RUN apt-get install -y \
+	iproute2 \
+	nmap \
+	lsof \
+	;
+
+# Cleanup install cache
+RUN apt-get clean
+
+
+
+# start SSH deamon
+CMD ["/usr/sbin/sshd", "-D", "-e"]
+

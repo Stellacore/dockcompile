@@ -1,0 +1,153 @@
+# Run graphic software in a remotely hosted docker container
+
+## Systems:
+
+Computers involved
+
+* UserNode: System on which user is working (running x11 server)
+* HostNode: System hosting docker container (intermediate system running docker)
+* DockNode: System running inside active docker container (running x11 client)
+
+Network configuration like this
+
+* Connections
+
+	```
+	UserNode(user access) -- { HostNode(run docker) -- DockNode(graphic apps) }
+	```
+
+## Setup
+
+### For DockNode: System
+
+Configure docker image (e.g. via DockerFile):
+
+* Create a user, group and set password
+
+  - consider using user/group ID that match with HostNode system to
+  facilitate file ownership/permissions
+
+	```
+	# Container system will have this user setup
+	ARG USER_NAME=username
+	ARG GROUP_NAME=username
+	ARG USER_ID=1000
+	ARG GROUP_ID=${USER_ID}
+	ARG USER_ROOT_PWD=${GROUP_NAME}
+	# Configure development user(s)
+	RUN \
+	  groupadd --gid ${GROUP_ID} ${GROUP_NAME} \
+	  && \
+	  useradd \
+		  --uid ${USER_ID} \
+		  --gid ${GROUP_ID} \
+		  -G sudo \
+		  --create-home \
+		  -s /bin/bash \
+		  ${USER_NAME} \
+		&& \
+		echo ${USER_NAME}:${USER_ROOT_PWD} | chpasswd \
+		&& \
+		echo root:${USER_ROOT_PWD} | chpasswd \
+		;
+	```
+
+* Configure for ssh with packages:
+
+	```
+	RUN apt-get install -y \
+		openssh-server \
+		;
+	RUN \
+		mkdir -p /var/run/sshd /home/${USER_NAME}/.ssh \
+		&& \
+		chmod 700 /home/${USER_NAME}/.ssh \
+		&& \
+		chown -R ${USER_NAME}:${USER_NAME} /home/${USER_NAME}/.ssh \
+		;
+	RUN printf \
+	    "PasswordAuthentication yes\nPermitRootLogin no\n"\
+	    >> /etc/ssh/sshd_config \
+		;
+	EXPOSE 22
+	```
+
+* Run sshd as command
+
+	```
+	# start SSH deamon
+	CMD ["/usr/sbin/sshd", "-D", "-e"]
+	```
+
+### On HostNode: System
+
+Build the image (e.g. via <a name=build.sh></a>build.sh):
+
+* Introduce image name. Note that the [ug]NAME replaces the default
+  value in the Dockerfile variavbles
+  {USER_NAME=username, GROUP_NAME=username} respectively. I.e. builds
+  the docker container with the user/group id of the user running the
+  build script.
+
+	```
+	uNAME="$(id -nu)"
+	gNAME="$(id -ng)"
+	echo "Building with  user: ${uNAME}"
+	echo "Building with group: ${gNAME}"
+	docker build \
+		-t dockgui \
+		--build-arg USER_NAME=${uNAME} \
+		--build-arg GROUP_NAME=${gNAME} \
+		. \
+		;
+	```
+
+Start a container (e.g. via run.sh):
+
+* Note: map DockNode system ssh port (22) onto HostNode port (2222). E.g.,
+	```
+	docker run -d \
+		-p 2222:22 \
+		--name ssh-container \
+		ssh-container \
+		;
+	```
+
+Stop/remove container (e.g. via stop.sh):
+
+* After use (ref below) is finished
+
+	```
+	docker stop ssh-container \
+	&& \
+	docker rm ssh-container \
+	;
+	```
+
+### On UserNode: System
+
+For SSH access
+
+* Optional: (on UserNode system) Start ssh-agent (optional to avoid
+  extra pwd typing)
+	```
+	eval "$(ssh-agent -s)"  # (only if no agent already running)
+	ssh-add  # (then type UserNode system private key password)
+	```
+
+* (On UserNode System) add public key to running docker container (DockHost).
+  NOTE: 'username' in example below matches that set in dockerfile
+  (via ${USER_NAME} in example above)
+  - same as that of user running the build.sh script 
+  if image was build with script [build.sh](#build.sh) as described
+  in section "On HostNode: System" above.
+
+	```
+	ssh-copy-id -p 2222 username@HostNode # (may get error message ++)
+	ssh -X -p 2222 username@HostNode
+	```
+  (++) May get an error message suggesting to do something like the
+  following in order to update authorized hosts
+
+
+
