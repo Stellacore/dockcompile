@@ -169,6 +169,19 @@ RUN \
 	&& \
 	chmod 0440 /etc/sudoers.d/${USER_NAME}
 
+# ---
+# --- User specific setup
+# ---
+
+# LLM development related (for specific user)
+USER ${USER_NAME}
+RUN curl -fsSL https://claude.ai/install.sh | bash
+USER root
+
+
+# ---
+# --- Set default command (can be overriden during container startup)
+# ---
 
 # start SSH deamon
 CMD ["/usr/sbin/sshd", "-D", "-e"]
