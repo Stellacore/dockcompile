@@ -161,29 +161,25 @@ RUN apt-get install -y \
 	lsof \
 	;
 
-# Cleanup install cache
-RUN apt-get clean
-
-RUN \
-	echo "${USER_NAME} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${USER_NAME} \
-	&& \
-	chmod 0440 /etc/sudoers.d/${USER_NAME}
-
-# ---
-# --- User specific setup
-# ---
-
-# LLM development related (for specific user)
-USER ${USER_NAME}
-RUN curl -fsSL https://claude.ai/install.sh | bash
-USER root
-
 # Extras
 RUN apt-get install -y \
 	ninja-build \
 	gitk \
 	pandoc \
 	;
+
+# Cleanup install cache
+RUN apt-get clean
+
+
+# ---
+# --- User specific setup
+# ---
+
+RUN \
+	echo "${USER_NAME} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${USER_NAME} \
+	&& \
+	chmod 0440 /etc/sudoers.d/${USER_NAME}
 
 
 # ---

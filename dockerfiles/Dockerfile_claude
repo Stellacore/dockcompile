@@ -1,0 +1,13 @@
+
+ARG FROM_TEMPLATE=ssh-gcc16.2:latest
+FROM ${FROM_TEMPLATE}
+
+# LLM development related (for specific user)
+ARG USER_NAME=build
+USER ${USER_NAME}
+RUN curl -fsSL https://claude.ai/install.sh | bash
+USER root
+
+CMD ["/usr/sbin/sshd", "-D", "-e"]
+
+
