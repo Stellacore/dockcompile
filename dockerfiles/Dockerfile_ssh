@@ -178,6 +178,13 @@ USER ${USER_NAME}
 RUN curl -fsSL https://claude.ai/install.sh | bash
 USER root
 
+# Extras
+RUN apt-get install -y \
+	ninja-build \
+	gitk \
+	pandoc \
+	;
+
 
 # ---
 # --- Set default command (can be overriden during container startup)
