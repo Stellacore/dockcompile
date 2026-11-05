@@ -10,6 +10,7 @@ docker run -d \
 	-p 2222:22 \
 	-v /tmpBuild:/tmpBuild/ \
 	-v /tmpLocal:/tmpLocal/ \
+	-v ${HOME}/repos/ClaudeTest:/tmpClaude/ \
 	-v ${HOME}/repos/:/repos \
 	--name ssh-claude-gcc16.2 \
 	ssh-claude-gcc16.2
