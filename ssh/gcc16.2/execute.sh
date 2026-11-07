@@ -18,12 +18,11 @@ COMMAND="$*"
 echo "COMMAND: ${COMMAND}"
 
 docker run --rm \
-	-p 2222:22 \
 	--user ${USER} \
 	-v /tmpBuild:/tmpBuild/ \
 	-v /tmpLocal:/tmpLocal/ \
 	-v ${HOME}/repos/:/repos \
-	--name ssh-gcc16.2 \
+	--name execute-ssh-gcc16.2 \
 	ssh-gcc16.2 \
 	bash -c "${COMMAND}" \
 	;

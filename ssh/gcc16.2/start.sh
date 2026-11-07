@@ -11,6 +11,7 @@ docker run -d \
 	-v /tmpBuild:/tmpBuild/ \
 	-v /tmpLocal:/tmpLocal/ \
 	-v ${HOME}/repos/:/repos \
-	--name ssh-gcc16.2 \
+	--hostname DOCKER \
+	--name run-ssh-gcc16.2 \
 	ssh-gcc16.2
 
