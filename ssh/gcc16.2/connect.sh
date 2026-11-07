@@ -2,18 +2,18 @@
 
 #
 # Run docker container with interactive (bash) shell
-# - container starts, provides shell, is removed after exit
-# - in-docker user same as username running this script
-# - mounts various build directories
+# - container is started, provides shell, is removed after exit
+# - in-docker username same as username starting this script
+# - mounts various build related directories
 #
 
 docker run -it --rm \
-	-p 2222:22 \
 	--user ${USER} \
 	-v /tmpBuild:/tmpBuild/ \
 	-v /tmpLocal:/tmpLocal/ \
 	-v ${HOME}/repos/:/repos \
 	--name ssh-gcc16.2 \
+	--hostname DOCKER \
 	ssh-gcc16.2 \
 	bash \
 	;
