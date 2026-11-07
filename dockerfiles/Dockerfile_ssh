@@ -91,17 +91,6 @@ RUN apt-get install -y \
 	valgrind \
 	;
 
-# ceres-solver - development
-RUN apt-get install -y \
-	libgoogle-glog-dev \
-	libgflags-dev \
-	libboost-graph-dev \
-	libeigen3-dev \
-	libsuitesparse-dev \
-	libopenblas-serial-dev \
-	libabsl-dev \
-	;
-
 # Realsense - setup
 RUN apt-get install -y \
 	libusb-1.0-0-dev \
@@ -133,6 +122,17 @@ RUN apt-get install -y \
 	libxcb-cursor0 \
 	;
 
+# ceres-solver - development
+RUN apt-get install -y \
+	libblas-dev \
+	liblapack-dev \
+	libeigen3-dev \
+	libsuitesparse-dev \
+	libmetis-dev \
+	libabsl-dev \
+	libgtest-dev \
+	;
+
 # Qt6 - development
 RUN apt-get install -y \
 	qt6-3d-dev \
@@ -147,11 +147,6 @@ RUN apt-get install -y \
 	qt6-multimedia-dev \
 	libqt6multimedia6 \
 	libqt6multimediawidgets6 \
-	;
-# Additional CFCapgture
-RUN apt-get install -y \
-	libxcb-cursor-dev \
-	libxcb-cursor0 \
 	;
 
 # Network packages
@@ -171,6 +166,19 @@ RUN apt-get install -y \
 RUN apt-get install -y \
 	python3 \
 	python3-numpy \
+	;
+
+RUN apt-get install -y \
+	libgoogle-glog-dev \
+	libgflags-dev \
+	libboost-graph-dev \
+	libopenblas-serial-dev \
+	;
+
+# Seem to be needed (but not sure) by librealsense
+RUN apt-get install -y \
+	libfastcdr-dev \
+	libfastrtps-dev \
 	;
 
 
