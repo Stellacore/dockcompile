@@ -197,6 +197,10 @@ RUN \
     /etc/security/limits.conf \
 	;
 
+RUN \
+	sed -i 's/01;32m/01;95m/' /home/${USER_NAME}/.bashrc \
+	;
+
 
 # ---
 # --- Set default command (can be overriden during container startup)
