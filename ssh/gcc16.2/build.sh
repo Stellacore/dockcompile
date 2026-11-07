@@ -10,7 +10,7 @@ docker build \
 	--build-arg GROUP_NAME=${gNAME} \
 	--build-arg USER_ID=${uID} \
 	--build-arg COMPILER_VERSION="gcc:16.2" \
-	--file ../../dockerfiles/Dockerfile_ssh \
+	--file ../../dockerfiles/Dockerfile_dev \
 	-t ssh-gcc16.2 \
 	. \
 	;
