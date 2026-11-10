@@ -1,0 +1,40 @@
+
+ARG FROM_TEMPLATE=ssh-gcc16.2:latest
+FROM ${FROM_TEMPLATE}
+
+# install system packages
+RUN apt-get -qq update
+
+# Node.js environment for pi-coder (install more recent version Node.js)
+RUN apt-get install -y \
+	npm \
+	&& \
+	npm cache clean -f \
+	&& \
+	npm install -g n \
+	&& \
+	n stable \
+	;
+
+# Needed for ollama install
+RUN apt-get install -y \
+	zstd \
+	;
+
+# Cleanup install cache
+RUN apt-get clean
+
+
+# Install ollama
+RUN \
+	curl -fsSL https://ollama.com/install.sh | sh \
+	;
+
+# Install pi-dev harness
+RUN \
+	npm install -g --ignore-scripts @earendil-works/pi-coding-agent \
+	;
+
+
+CMD ["/usr/sbin/sshd", "-D", "-e"]
+
